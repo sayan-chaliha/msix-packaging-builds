@@ -22,5 +22,5 @@ add_executable(${PROJECT_NAME}
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${MSIX_BINARY_ROOT}/src/msix)
 
-add_dependencies(${PROJECT_NAME} msix)
-target_link_libraries(${PROJECT_NAME} msix)
+add_dependencies(${PROJECT_NAME} msix_static)
+target_link_libraries(${PROJECT_NAME} msix_static)

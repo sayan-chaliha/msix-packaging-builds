@@ -236,8 +236,14 @@ add_library(${PROJECT_NAME} SHARED
     ${MsixSrc}
  )
 
+ add_library(${PROJECT_NAME}_static STATIC 
+    msix.cpp
+    ${MsixSrc}
+ )
+
 # Adding dependency to the third party libs directory
 add_dependencies(${PROJECT_NAME} LIBS)
+add_dependencies(${PROJECT_NAME}_static LIBS)
 
 # Copy out public headers to <binary dir>/src/unpack
 configure_file(../inc/public/MSIXWindows.hpp   ${CMAKE_CURRENT_BINARY_DIR}/MSIXWindows.hpp  )
@@ -247,6 +253,7 @@ configure_file(../inc/public/MsixErrors.hpp    ${CMAKE_CURRENT_BINARY_DIR}/MsixE
 # Linker and includes
 # Include MSIX headers
 target_include_directories(${PROJECT_NAME} PRIVATE ${MSIX_PROJECT_ROOT}/src/inc/public ${MSIX_PROJECT_ROOT}/src/inc/shared ${MSIX_PROJECT_ROOT}/src/inc/internal)
+target_include_directories(${PROJECT_NAME}_static PRIVATE ${MSIX_PROJECT_ROOT}/src/inc/public ${MSIX_PROJECT_ROOT}/src/inc/shared ${MSIX_PROJECT_ROOT}/src/inc/internal)
 
 if(WIN32)
     string(REPLACE "/GR" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
@@ -292,22 +299,31 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 if(((IOS) OR (MACOS)) AND (NOT USE_MSIX_SDK_ZLIB))
     # for macos and ios use the inbox libcompression zlib apis instead of zlib, unless zlib is explicitly requested.
     target_include_directories(${PROJECT_NAME} PRIVATE ${MSIX_PROJECT_ROOT}/src/msix/PAL/DataCompression/Apple)
+    target_include_directories(${PROJECT_NAME}_static PRIVATE ${MSIX_PROJECT_ROOT}/src/msix/PAL/DataCompression/Apple)
     target_link_libraries(${PROJECT_NAME} PRIVATE libcompression.dylib)
+    target_link_libraries(${PROJECT_NAME}_static PRIVATE libcompression.dylib)
 elseif((AOSP) AND (NOT USE_MSIX_SDK_ZLIB))
     # for AOSP, use the libz.so from the android ndk.
     find_package(ZLIB REQUIRED)
     target_link_libraries(${PROJECT_NAME} PRIVATE -lz)
+    target_link_libraries(${PROJECT_NAME}_static PRIVATE -lz)
 else() # WIN32 or USE_MSIX_SDK_ZLIB
     target_include_directories(${PROJECT_NAME} PRIVATE 
+            ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/zlib
+            ${MSIX_PROJECT_ROOT}/lib/zlib
+        )
+    target_include_directories(${PROJECT_NAME}_static PRIVATE 
             ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/zlib
             ${MSIX_PROJECT_ROOT}/lib/zlib
         )
     if(USE_SHARED_ZLIB)
         message(STATUS "MSIX takes a dynamic dependency on zlib")
         target_link_libraries(${PROJECT_NAME} PRIVATE zlib)
+        target_link_libraries(${PROJECT_NAME}_static PRIVATE zlib)
     else()
         message(STATUS "MSIX takes a static dependency on zlib")
         target_link_libraries(${PROJECT_NAME} PRIVATE zlibstatic)
+        target_link_libraries(${PROJECT_NAME}_static PRIVATE zlibstatic)
     endif()
 endif()
 
@@ -317,11 +333,17 @@ if(XML_PARSER MATCHES xerces)
         ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/xerces/src
         ${MSIX_PROJECT_ROOT}/lib/xerces/src
     )
+    target_include_directories(${PROJECT_NAME}_static PRIVATE
+        ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/xerces/src
+        ${MSIX_PROJECT_ROOT}/lib/xerces/src
+    )
     target_link_libraries(${PROJECT_NAME} PRIVATE xerces-c)
+    target_link_libraries(${PROJECT_NAME}_static PRIVATE xerces-c)
 endif()
 
 if(XML_PARSER MATCHES applexml)
     target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/PAL/XML/Apple)
+    target_include_directories(${PROJECT_NAME}_static PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/PAL/XML/Apple)
 endif()
 
 if(AOSP)
@@ -372,6 +394,7 @@ endif()
 # Misc Linking
 if((IOS) OR (MACOS))
     target_link_libraries(${PROJECT_NAME} PRIVATE ${COREFOUNDATION_LIBRARY} ${FOUNDATION_LIBRARY})
+    target_link_libraries(${PROJECT_NAME}_static PRIVATE ${COREFOUNDATION_LIBRARY} ${FOUNDATION_LIBRARY})
 endif()
 if(LINUX)
     target_link_libraries(${PROJECT_NAME} PRIVATE ${ICU_LIBRARIES})
@@ -380,11 +403,15 @@ endif()
 if(OpenSSL_FOUND)
     # include the libraries needed to use OpenSSL
     target_include_directories(${PROJECT_NAME} PRIVATE ${OpenSSL_INCLUDE_PATH})
+    target_include_directories(${PROJECT_NAME}_static PRIVATE ${OpenSSL_INCLUDE_PATH})
     if((IOS) OR (MACOS))
         target_link_libraries(${PROJECT_NAME} PRIVATE crypto -Wl,-dead_strip)
+        target_link_libraries(${PROJECT_NAME}_static PRIVATE crypto -Wl,-dead_strip)
     elseif(NOT MSVC)
         target_link_libraries(${PROJECT_NAME} PRIVATE crypto -Wl,--gc-sections)
+        target_link_libraries(${PROJECT_NAME}_static PRIVATE crypto -Wl,--gc-sections)
     else()
         target_link_libraries(${PROJECT_NAME} PRIVATE crypto)
+        target_link_libraries(${PROJECT_NAME}_static PRIVATE crypto)
     endif()
 endif()
