@@ -72,4 +72,4 @@ cmake -DCMAKE_BUILD_TYPE=$build \
       -DMSIX_SAMPLES=$samples \
       -DMSIX_TESTS=$tests \
       -DLINUX=on ..
-make
+make -j8
