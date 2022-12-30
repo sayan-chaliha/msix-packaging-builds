@@ -22,7 +22,7 @@ jobs:
 
     - name: Build
       # Build your program with the given configuration
-      run: ./makelinux.sh -sb --pack 
+      run: ./makelinux.sh -sb --pack --skip-samples
 
     - name: Test
       working-directory: ${{github.workspace}}/.vs
