@@ -30,6 +30,13 @@ jobs:
           path: |
             .vs/bin/makemsix
 
+      - name: Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14.x
+
+      - run: node -e "console.log(require(\"os\").release())"
+
   build-macos-arm64:
     runs-on: macos-latest
     steps:
@@ -44,6 +51,14 @@ jobs:
           name: makemsix-darwin-arm64
           path: |
             .vs/bin/makemsix
+
+      - name: Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14.x
+
+      - run: node -e "console.log(require(\"os\").release())"
+
 
   build-linux-ubuntu-22:
     runs-on: ubuntu-latest
@@ -70,9 +85,9 @@ jobs:
         with:
           node-version: 14.x
 
-      - run: node -e "console.log(require(\"os\").version())"
+      - run: node -e "console.log(require(\"os\").release())"
 
-  build-linux-20:
+  build-linux-ubuntu-20:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
@@ -97,6 +112,6 @@ jobs:
         with:
           node-version: 14.x
 
-      - run: node -e "console.log(require(\"os\").version())"
+      - run: node -e "console.log(require(\"os\").release())"
 
 
