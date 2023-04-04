@@ -65,12 +65,12 @@ jobs:
           path: |
             .vs/bin/makemsix
 
-     - name: Node
-       uses: actions/setup-node@v3
-       with:
-         node-version: 14.x
+      - name: Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14.x
 
-    - run: node -e "console.log(require(\"os\").version())"
+      - run: node -e "console.log(require(\"os\").version())"
 
   build-linux-20:
     runs-on: ubuntu-20.04
@@ -92,9 +92,11 @@ jobs:
           path: |
             .vs/bin/makemsix
 
-     - name: Node
-       uses: actions/setup-node@v3
-       with:
-         node-version: 14.x
+      - name: Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14.x
 
-    - run: node -e "console.log(require(\"os\").version())"
+      - run: node -e "console.log(require(\"os\").version())"
+
+
